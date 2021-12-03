@@ -32,7 +32,16 @@ func DataToPacket(dataArr []byte) IPv4Packet { // TODO: Look at encoding/gib
 	check := [2]byte{dataArr[10], dataArr[11]}
 	sourceIP := [4]byte{dataArr[12], dataArr[13], dataArr[14], dataArr[15]}
 	destIP := [4]byte{dataArr[16], dataArr[17], dataArr[18], dataArr[19]}
-	data := dataArr[20:]
+
+	var i int
+	dataLen := len(dataArr)
+	for i = -1; true; i-- {
+		if dataArr[dataLen+i] != 0x00 {
+			break
+		}
+	}
+
+	data := dataArr[20 : dataLen+i]
 
 	return IPv4Packet{
 		VerAndHeadLen:  verAndHeadLen,

@@ -21,11 +21,12 @@ func readFromSocket() {
 	data := make([]byte, 1024)
 	//for {
 	syscall.Recvfrom(fd, data, 0)
-	fmt.Println(data)
-	fmt.Println()
+	// fmt.Println(data)
+	// fmt.Println()
 	frame := packet.DataToFrame(data)
 	fmt.Println(frame.ToHexString())
-	fmt.Println()
+	// fmt.Println()
+	// fmt.Println(hex.EncodeToString(data))
 	//}
 }
 
