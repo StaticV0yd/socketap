@@ -24,7 +24,7 @@ func readFromSocket(fd int) {
 func sendFromSocket(fd int) {
 	var addr syscall.SockaddrLinklayer
 	addr.Protocol = syscall.ETH_P_ALL
-	//addr.Ifindex = interf.Index
+
 }
 
 func main() {
