@@ -1,6 +1,8 @@
 package packet
 
-import "encoding/hex"
+import (
+	"encoding/hex"
+)
 
 var IPv4Version [4]bool = [4]bool{false, true, false, false}
 var TCPProt byte = 0x06
@@ -83,3 +85,14 @@ func (packet IPv4Packet) ToHexString() string {
 // 	SourceAddr    [16]byte
 // 	DestAddr      [16]byte
 // }
+
+func (packet IPv4Packet) ToString() string {
+	var returnStr string
+	returnStr += "        Source IP: "
+	returnStr += insertDecimalFormat(packet.SourceIP[:], ".")
+
+	returnStr += "\n        Destination IP: "
+	returnStr += insertDecimalFormat(packet.DestIP[:], ".")
+
+	return returnStr
+}

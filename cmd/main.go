@@ -10,15 +10,17 @@ import (
 func readFromSocket(fd int) {
 
 	data := make([]byte, 1024)
-	for {
-		syscall.Recvfrom(fd, data, 0)
-		// fmt.Println(data)
-		// fmt.Println()
-		frame := packet.DataToFrame(data)
-		fmt.Println(frame.ToHexString())
-		// fmt.Println()
-		// fmt.Println(hex.EncodeToString(data))
-	}
+	//for {
+	syscall.Recvfrom(fd, data, 0)
+	// fmt.Println(data)
+	// fmt.Println()
+	frame := packet.DataToFrame(data)
+	fmt.Println(frame.ToHexString())
+	fmt.Println()
+	fmt.Println(frame.ToString())
+	// fmt.Println()
+	// fmt.Println(hex.EncodeToString(data))
+	//}
 }
 
 func sendFromSocket(fd int) {

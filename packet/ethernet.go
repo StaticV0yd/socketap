@@ -1,9 +1,12 @@
 package packet
 
-import "encoding/hex"
+import (
+	"encoding/hex"
+	"fmt"
+)
 
 var IPv4 [2]byte = [2]byte{0x08, 0x00}
-var IPv6 [2]byte = [2]byte{0x08, 0x06}
+var IPv6 [2]byte = [2]byte{0x86, 0xdd}
 
 type EthernetIIFrame struct {
 	DestinationMac [6]byte
@@ -52,4 +55,53 @@ func (frame EthernetIIFrame) ToHexString() string {
 	hexString += frame.Data.ToHexString()
 
 	return hexString
+}
+
+func (frame EthernetIIFrame) ToString() string {
+	var returnStr string
+	returnStr += "Ethernet II: {"
+
+	returnStr += "\n    Destination MAC: "
+	returnStr += insertHexFormat(frame.DestinationMac[:], ":")
+
+	returnStr += "\n    Source MAC: "
+	returnStr += insertHexFormat(frame.SourceMac[:], ":")
+
+	returnStr += "\n    Type: 0x"
+	returnStr += insertHexFormat(frame.EtherType[:], "")
+	if frame.EtherType == IPv4 {
+		returnStr += " (IPv4)"
+	} else if frame.EtherType == IPv6 {
+		returnStr += " (IPv6)"
+	}
+
+	returnStr += "\n\n    IPv4: {"
+	returnStr += "\n" + frame.Data.ToString()
+	returnStr += "\n    }"
+
+	returnStr += "\n}\n"
+	return returnStr
+}
+
+func insertHexFormat(byteArr []byte, delimiter string) string {
+	var returnStr string
+	for i := 0; i < len(byteArr); i++ {
+		returnStr += hex.EncodeToString([]byte{byteArr[i]})
+		if i+1 != len(byteArr) {
+			returnStr += delimiter
+		}
+	}
+	return returnStr
+}
+
+func insertDecimalFormat(byteArr []byte, delimiter string) string {
+	var returnStr string
+	for i := 0; i < len(byteArr); i++ {
+		returnStr += fmt.Sprint(byteArr[i])
+		if i+1 != len(byteArr) {
+			returnStr += "."
+		}
+	}
+
+	return returnStr
 }
