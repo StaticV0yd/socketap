@@ -149,7 +149,7 @@ func DataToIPv6Packet(dataArr []byte) IPv6Packet {
 	}
 }
 
-func (packet IPv4Packet) IPv4ToHexString() string {
+func (packet IPv4Packet) ToHexString() string {
 	var hexString string
 	hexString += hex.EncodeToString([]byte{packet.VerAndHeadLen, packet.DSCPandECN})
 	hexString += hex.EncodeToString(packet.Length[:])
@@ -164,7 +164,7 @@ func (packet IPv4Packet) IPv4ToHexString() string {
 	return hexString
 }
 
-func (packet IPv6Packet) IPv6ToHexString() string {
+func (packet IPv6Packet) ToHexString() string {
 	var hexString string
 	hexString += hex.EncodeToString([]byte{packet.Version})[2:]
 	hexString += hex.EncodeToString([]byte{packet.TrafficClass})
@@ -181,14 +181,73 @@ func (packet IPv6Packet) IPv6ToHexString() string {
 func (packet IPv4Packet) ToString() string {
 	var returnStr string
 
-	returnStr += "        VerAndHeadLength: "
+	returnStr += "        VerAndHeadLength: 0x"
 	returnStr += insertHexFormat([]byte{packet.VerAndHeadLen}, "")
+
+	returnStr += "\n        DSCP and ECN: 0x"
+	returnStr += insertHexFormat([]byte{packet.DSCPandECN}, "")
+
+	returnStr += "\n        Total Length: "
+	returnStr += fmt.Sprintf("%d", binary.BigEndian.Uint16(packet.Length[:]))
+
+	returnStr += "\n        Identification: 0x"
+	returnStr += insertHexFormat(packet.Identification[:], "")
+
+	returnStr += "\n        Flags: 0x"
+	returnStr += insertHexFormat(packet.FlagAndFrag[:], "")
+
+	returnStr += "\n        Time to Live: "
+	returnStr += fmt.Sprintf("%d", int(packet.TTL))
+
+	returnStr += "\n        Protocol: "
+	returnStr += fmt.Sprintf("%d", int(packet.Protocol))
+
+	returnStr += "\n        Checksum: 0x"
+	returnStr += insertHexFormat(packet.Checksum[:], "")
 
 	returnStr += "\n        Source IP: "
 	returnStr += insertDecimalFormat(packet.SourceIP[:], ".")
 
 	returnStr += "\n        Destination IP: "
 	returnStr += insertDecimalFormat(packet.DestIP[:], ".")
+
+	return returnStr
+}
+
+func (packet IPv6Packet) ToString() string {
+	var returnStr string
+
+	returnStr += "        Version: "
+	returnStr += fmt.Sprintf("%d", int(packet.Version))
+
+	returnStr += "\n        Traffic Class: 0x"
+	returnStr += insertHexFormat([]byte{packet.TrafficClass}, "")
+
+	returnStr += "\n        Flow Label: 0x"
+	returnStr += insertHexFormat(packet.FlowLabel[:], "")
+
+	returnStr += "\n        Payload Length: "
+	returnStr += fmt.Sprintf("%d", binary.BigEndian.Uint16(packet.PayloadLength[:]))
+
+	returnStr += "\n        Next Header: "
+	returnStr += fmt.Sprintf("%d", int(packet.NextHeader))
+
+	returnStr += "\n        Hop Limit: "
+	returnStr += fmt.Sprintf("%d", int(packet.HopLimit))
+
+	returnStr += "\n        Source Address: "
+	srcAddr := insertHexFormat(packet.SourceAddr[:], "")
+	for i := len(srcAddr) - 4; i > 0; i -= 4 {
+		srcAddr = srcAddr[:i] + ":" + srcAddr[i:]
+	}
+	returnStr += srcAddr
+
+	returnStr += "\n        Destination Address: "
+	destAddr := insertHexFormat(packet.DestAddr[:], "")
+	for i := len(destAddr) - 4; i > 0; i -= 4 {
+		destAddr = destAddr[:i] + ":" + destAddr[i:]
+	}
+	returnStr += destAddr
 
 	return returnStr
 }
