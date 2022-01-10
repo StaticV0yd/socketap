@@ -12,7 +12,11 @@ type EthernetIIFrame struct {
 	DestinationMac [6]byte
 	SourceMac      [6]byte
 	EtherType      [2]byte
-	Data           IPv4Packet
+	DataIPv4       IPv4Packet
+	DataIPv6       IPv6Packet
+
+	PacketType int
+
 	//CRCChecksum    [4]byte
 }
 
@@ -26,14 +30,28 @@ func DataToFrame(dataArr []byte) EthernetIIFrame { // TODO: Look at encoding/gib
 		srcMac[i] = dataArr[6+i]
 	}
 	etherType := [2]byte{dataArr[12], dataArr[13]}
-	data := DataToPacket(dataArr[14:])
+	ipType := DataPacketType(dataArr[14:])
+	ipTypeInt := int(ipType)
+	dataIPv4 := IPv4Packet{}
+	dataIPv6 := IPv6Packet{}
+	if ipTypeInt == 4 {
+		dataIPv4 = DataToIPv4Packet(dataArr[14:])
+	} else if ipTypeInt == 6 {
+		dataIPv6 = DataToIPv6Packet(dataArr[14:])
+	}
 
 	return EthernetIIFrame{
 		DestinationMac: destMac,
 		SourceMac:      srcMac,
 		EtherType:      etherType,
-		Data:           data,
+		DataIPv4:       dataIPv4,
+		DataIPv6:       dataIPv6,
+		PacketType:     ipTypeInt,
 	}
+}
+
+func (frame EthernetIIFrame) GetPacketType() int {
+	return frame.PacketType
 }
 
 // func NewEthernetFrame(destMac [6]byte, srcMac [6]byte,
@@ -52,7 +70,8 @@ func (frame EthernetIIFrame) ToHexString() string {
 	hexString += hex.EncodeToString(frame.DestinationMac[:])
 	hexString += hex.EncodeToString(frame.SourceMac[:])
 	hexString += hex.EncodeToString(frame.EtherType[:])
-	hexString += frame.Data.ToHexString()
+	hexString += frame.DataIPv4.IPv4ToHexString()
+	hexString += frame.DataIPv6.IPv6ToHexString()
 
 	return hexString
 }
@@ -76,7 +95,7 @@ func (frame EthernetIIFrame) ToString() string {
 	}
 
 	returnStr += "\n\n    IPv4: {"
-	returnStr += "\n" + frame.Data.ToString()
+	returnStr += "\n" + frame.DataIPv4.ToString()
 	returnStr += "\n    }"
 
 	returnStr += "\n}\n"
