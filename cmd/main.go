@@ -43,7 +43,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
 	frame := packet.EthernetIIFrame{}
 	for true {
 		frame = readFromSocket(fd)
