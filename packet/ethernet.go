@@ -76,8 +76,12 @@ func (frame EthernetIIFrame) ToHexString() string {
 	hexString += hex.EncodeToString(frame.DestinationMac[:])
 	hexString += hex.EncodeToString(frame.SourceMac[:])
 	hexString += hex.EncodeToString(frame.EtherType[:])
-	hexString += frame.DataIPv4.ToHexString()
-	hexString += frame.DataIPv6.ToHexString()
+	if frame.EtherType == IPv4 {
+		hexString += frame.DataIPv4.ToHexString()
+	}
+	if frame.EtherType == IPv6 {
+		hexString += frame.DataIPv6.ToHexString()
+	}
 
 	return hexString
 }

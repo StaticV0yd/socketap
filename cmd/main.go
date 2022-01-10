@@ -47,7 +47,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	frame := readFromSocket(fd)
+	frame := packet.EthernetIIFrame{}
+	for true {
+		frame = readFromSocket(fd)
+		if frame.DataIPv4.Protocol == byte(0x01) {
+			break
+		}
+	}
+
 	fmt.Println(frame.ToString())
 	fmt.Println(frame.ToHexString())
 
