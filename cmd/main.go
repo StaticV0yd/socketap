@@ -43,14 +43,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	//err = syscall.BindToDevice(fd, "wlp115s0")
-	if err != nil {
-		panic(err)
-	}
+
 	frame := packet.EthernetIIFrame{}
 	for true {
 		frame = readFromSocket(fd)
-		if frame.DataIPv4.Protocol == byte(0x01) {
+		fmt.Println(frame.ToString())
+		fmt.Println(frame.ToHexString())
+		if frame.DataIPv4.Protocol == byte(0x01) && frame.DataIPv4.SourceIP == [4]byte{8, 8, 8, 8} {
 			break
 		}
 	}
