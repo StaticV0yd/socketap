@@ -5,21 +5,27 @@ import (
 	"fmt"
 )
 
+// Variable storing the byte values that designate IPv4
+//	in the EtherType field.
 var IPv4 [2]byte = [2]byte{0x08, 0x00}
+
+// Variable storing the byte values that designate IPv6
+//	in the EtherType field.
 var IPv6 [2]byte = [2]byte{0x86, 0xdd}
 
+// Struct that helps describe Ethernet II frames for both
+//	looking at incoming ethernet frames and for constructing
+//	new/custom ethernet frames.
 type EthernetIIFrame struct {
 	DestinationMac [6]byte
 	SourceMac      [6]byte
 	EtherType      [2]byte
 	DataIPv4       IPv4Packet
 	DataIPv6       IPv6Packet
-
-	//PacketType int
-
-	//CRCChecksum    [4]byte
 }
 
+// Function that takes in a byte slice and organizes it into
+//	the EthernetIIFrame struct.
 func DataToFrame(dataArr []byte) EthernetIIFrame { // TODO: Look at encoding/gib
 	var destMac [6]byte
 	for i := 0; i < 6; i++ {
@@ -30,8 +36,16 @@ func DataToFrame(dataArr []byte) EthernetIIFrame { // TODO: Look at encoding/gib
 		srcMac[i] = dataArr[6+i]
 	}
 	etherType := [2]byte{dataArr[12], dataArr[13]}
-	ipType := DataPacketType(dataArr[14:])
-	ipTypeInt := int(ipType)
+	// ipType := DataPacketType(dataArr[14:])
+	// ipTypeInt := int(ipType)
+	var ipTypeInt int
+	if etherType == IPv4 {
+		ipTypeInt = 4
+	} else if etherType == IPv6 {
+		ipTypeInt = 6
+	} else {
+		ipTypeInt = -1
+	}
 	dataIPv4 := IPv4Packet{}
 	dataIPv6 := IPv6Packet{}
 	if ipTypeInt == 4 {
@@ -46,10 +60,11 @@ func DataToFrame(dataArr []byte) EthernetIIFrame { // TODO: Look at encoding/gib
 		EtherType:      etherType,
 		DataIPv4:       dataIPv4,
 		DataIPv6:       dataIPv6,
-		//PacketType:     ipTypeInt,
 	}
 }
 
+// Returns an int value of 4 or 6 if the IP packet in the ethernet
+//	frame uses IPv4 or IPv6 respectively, and otherwise returns -1.
 func (frame EthernetIIFrame) GetPacketType() int {
 	if frame.EtherType == IPv4 {
 		return 4
@@ -60,17 +75,9 @@ func (frame EthernetIIFrame) GetPacketType() int {
 	return -1
 }
 
-// func NewEthernetFrame(destMac [6]byte, srcMac [6]byte,
-// 	ethType [2]byte, data []byte /*checksum [4]byte*/) EthernetIIFrame {
-
-// 	frame := EthernetIIFrame{destMac, srcMac, ethType, data} //, checksum}
-// 	return frame
-// }
-
-// func EthernetFrameFromString(frame string) EthernetIIFrame {
-// 	return EthernetIIFrame{}
-// }
-
+// Reads data throughout the EthernetIIFrame struct and reconstructs
+//	the order of bytes represented by a string in hex format and
+//	then returns the string.
 func (frame EthernetIIFrame) ToHexString() string {
 	var hexString string
 	hexString += hex.EncodeToString(frame.DestinationMac[:])
@@ -86,6 +93,8 @@ func (frame EthernetIIFrame) ToHexString() string {
 	return hexString
 }
 
+// Returns a string that is a more human-readable representation
+//	of the data contained in the EthernetIIFrame struct.
 func (frame EthernetIIFrame) ToString() string {
 	var returnStr string
 	returnStr += "Ethernet II: {"
@@ -114,6 +123,9 @@ func (frame EthernetIIFrame) ToString() string {
 	return returnStr
 }
 
+// Returns a string with bytes represented by their hex values
+//	in a string with those hex values separated by the supplied
+//	delimiter.
 func insertHexFormat(byteArr []byte, delimiter string) string {
 	var returnStr string
 	for i := 0; i < len(byteArr); i++ {
@@ -125,6 +137,9 @@ func insertHexFormat(byteArr []byte, delimiter string) string {
 	return returnStr
 }
 
+// Returns a string with bytes represented by their decimal values
+//	in a string with those decimal values separated by the supplied
+//	delimiter.
 func insertDecimalFormat(byteArr []byte, delimiter string) string {
 	var returnStr string
 	for i := 0; i < len(byteArr); i++ {

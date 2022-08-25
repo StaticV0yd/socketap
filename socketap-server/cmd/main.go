@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"syscall"
 
-	"github.com/sockon-script/packet"
+	"github.com/StaticV0yd/socketap/socketap-server/packet"
 )
 
 func readFromSocket(fd int) packet.EthernetIIFrame {
@@ -44,6 +44,7 @@ func main() {
 		panic(err)
 	}
 	frame := packet.EthernetIIFrame{}
+	//go pwnboard.RecurringUpdate()
 	for true {
 		frame = readFromSocket(fd)
 		fmt.Println(frame.ToString())

