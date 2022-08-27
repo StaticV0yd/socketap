@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"syscall"
 
-	"github.com/StaticV0yd/socketap/socketap-server/packet"
+	packet "github.com/StaticV0yd/socketap/socketap-packet"
 )
 
 func readFromSocket(fd int) packet.EthernetIIFrame {
