@@ -1,41 +1,52 @@
-package main
+package packet
 
 import (
 	"encoding/hex"
 	"fmt"
 )
 
-// Variable storing the byte values that designate IPv4
-//	in the EtherType field.
-var IPv4 [2]byte = [2]byte{0x08, 0x00}
+type EtherType [2]byte
+type MacAddress [6]byte
 
-// Variable storing the byte values that designate IPv6
-//	in the EtherType field.
-var IPv6 [2]byte = [2]byte{0x86, 0xdd}
+/*
+Variable storing the byte values that designate IPv4
+in the EtherType field.
+*/
+var IPv4 EtherType = [2]byte{0x08, 0x00}
 
-// Struct that helps describe Ethernet II frames for both
-//	looking at incoming ethernet frames and for constructing
-//	new/custom ethernet frames.
+/*
+Variable storing the byte values that designate IPv6
+in the EtherType field.
+*/
+var IPv6 EtherType = [2]byte{0x86, 0xdd}
+
+/*
+Struct that helps describe Ethernet II frames for both
+looking at incoming ethernet frames and for constructing
+new/custom ethernet frames.
+*/
 type EthernetIIFrame struct {
-	DestinationMac [6]byte
-	SourceMac      [6]byte
-	EtherType      [2]byte
+	DestinationMac MacAddress
+	SourceMac      MacAddress
+	EtherType      EtherType
 	DataIPv4       IPv4Packet
 	DataIPv6       IPv6Packet
 }
 
-// Function that takes in a byte slice and organizes it into
-//	the EthernetIIFrame struct.
+/*
+Function that takes in a byte slice and organizes it into
+the EthernetIIFrame struct.
+*/
 func DataToFrame(dataArr []byte) EthernetIIFrame { // TODO: Look at encoding/gib
-	var destMac [6]byte
+	var destMac MacAddress
 	for i := 0; i < 6; i++ {
 		destMac[i] = dataArr[i]
 	}
-	var srcMac [6]byte
+	var srcMac MacAddress
 	for i := 0; i < 6; i++ {
 		srcMac[i] = dataArr[6+i]
 	}
-	etherType := [2]byte{dataArr[12], dataArr[13]}
+	etherType := EtherType{dataArr[12], dataArr[13]}
 	// ipType := DataPacketType(dataArr[14:])
 	// ipTypeInt := int(ipType)
 	var ipTypeInt int
@@ -63,8 +74,10 @@ func DataToFrame(dataArr []byte) EthernetIIFrame { // TODO: Look at encoding/gib
 	}
 }
 
-// Returns an int value of 4 or 6 if the IP packet in the ethernet
-//	frame uses IPv4 or IPv6 respectively, and otherwise returns -1.
+/*
+Returns an int value of 4 or 6 if the IP packet in the ethernet
+frame uses IPv4 or IPv6 respectively, and otherwise returns -1.
+*/
 func (frame EthernetIIFrame) GetPacketType() int {
 	if frame.EtherType == IPv4 {
 		return 4
@@ -75,9 +88,11 @@ func (frame EthernetIIFrame) GetPacketType() int {
 	return -1
 }
 
-// Reads data throughout the EthernetIIFrame struct and reconstructs
-//	the order of bytes represented by a string in hex format and
-//	then returns the string.
+/*
+Reads data throughout the EthernetIIFrame struct and reconstructs
+the order of bytes represented by a string in hex format and
+then returns the string.
+*/
 func (frame EthernetIIFrame) ToHexString() string {
 	var hexString string
 	hexString += hex.EncodeToString(frame.DestinationMac[:])
@@ -93,8 +108,10 @@ func (frame EthernetIIFrame) ToHexString() string {
 	return hexString
 }
 
-// Returns a string that is a more human-readable representation
-//	of the data contained in the EthernetIIFrame struct.
+/*
+Returns a string that is a more human-readable representation
+of the data contained in the EthernetIIFrame struct.
+*/
 func (frame EthernetIIFrame) ToString() string {
 	var returnStr string
 	returnStr += "Ethernet II: {"
@@ -123,9 +140,11 @@ func (frame EthernetIIFrame) ToString() string {
 	return returnStr
 }
 
-// Returns a string with bytes represented by their hex values
-//	in a string with those hex values separated by the supplied
-//	delimiter.
+/*
+Returns a string with bytes represented by their hex values
+in a string with those hex values separated by the supplied
+delimiter.
+*/
 func insertHexFormat(byteArr []byte, delimiter string) string {
 	var returnStr string
 	for i := 0; i < len(byteArr); i++ {
@@ -137,9 +156,11 @@ func insertHexFormat(byteArr []byte, delimiter string) string {
 	return returnStr
 }
 
-// Returns a string with bytes represented by their decimal values
-//	in a string with those decimal values separated by the supplied
-//	delimiter.
+/*
+Returns a string with bytes represented by their decimal values
+in a string with those decimal values separated by the supplied
+delimiter.
+*/
 func insertDecimalFormat(byteArr []byte, delimiter string) string {
 	var returnStr string
 	for i := 0; i < len(byteArr); i++ {
