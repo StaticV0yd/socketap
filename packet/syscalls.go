@@ -1,6 +1,7 @@
 package packet
 
 import (
+	"net"
 	"syscall"
 )
 
@@ -9,14 +10,14 @@ Returns an int representing the socket created, a string containing the name
 of the bound interface, and a byte array of length 6 containing the hardware
 (MAC) address of the bound interface.
 */
-func CreateSocket(iface string) (int, error) {
+func CreateSocket(iface net.Interface) (int, error) {
 
 	fd, err := syscall.Socket(syscall.AF_PACKET, syscall.SOCK_RAW, 0x0300)
 	if err != nil {
 		return -1, err
 	}
 
-	err = syscall.BindToDevice(fd, iface)
+	err = syscall.BindToDevice(fd, iface.Name)
 	if err != nil {
 		return -1, err
 	}
@@ -46,10 +47,21 @@ func ReadFromSocket(fd int) EthernetIIFrame {
 /*
 Sends data from a socket.
 */
-func SendFromSocket(fd int, ifIndex int, frame EthernetIIFrame) {
-	var addr syscall.SockaddrLinklayer
+func SendFromSocket(fd int, ifIndex int, frame EthernetIIFrame) error { //TODO
+	var addr = &syscall.SockaddrLinklayer{
+		Protocol: 0x0300,
+		Ifindex:  ifIndex,
+	}
 	addr.Protocol = syscall.ETH_P_ALL
+	frameBytes := make([]byte, 0)
+	frameBytes = append(frameBytes, frame.DestinationMac[:]...)
+	frameBytes = append(frameBytes, frame.SourceMac[:]...)
+	frameBytes = append(frameBytes, frame.EtherType[:]...)
+	frameBytes = append(frameBytes, frame.DataIPv4.ToData()...)
 
+	err := syscall.Sendto(fd, frameBytes, 0, addr)
+
+	return err
 	// addr.Halen = 6
 	// addr.Addr = [8]byte{
 	// 	destMac[0],

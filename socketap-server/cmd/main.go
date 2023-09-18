@@ -11,14 +11,16 @@ func main() {
 
 	ifaces, err := net.Interfaces()
 	var iface net.Interface
-	if err == nil {
-		iface = ifaces[1]
+	if err != nil {
+		panic(err)
 	}
+
+	iface = ifaces[1]
 
 	fmt.Println("Attempting to bind to interface", iface.Name+"...")
 	fmt.Println(iface.HardwareAddr.String())
 
-	fd, err := packet.CreateSocket(iface.Name)
+	fd, err := packet.CreateSocket(iface)
 	if err != nil {
 		panic(err)
 	}
@@ -32,7 +34,7 @@ func main() {
 		fmt.Println(frame.ToString())
 		fmt.Println(frame.ToHexString())
 
-		if frame.DataIPv4.Protocol == byte(0x01) && frame.DataIPv4.SourceIP == [4]byte{8, 8, 8, 8} {
+		if frame.DataIPv4.Protocol == byte(0x01) && frame.DataIPv4.SourceAddr == [4]byte{8, 8, 8, 8} {
 			break
 		}
 	}

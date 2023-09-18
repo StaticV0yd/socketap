@@ -6,7 +6,9 @@ import (
 	"fmt"
 )
 
-// Constants that store various byte values of significance.
+/*
+Constants that store various byte values of significance.
+*/
 const (
 	IPv4Version byte = 0x04
 	IPv6Version byte = 0x06
@@ -15,8 +17,10 @@ const (
 	ICMPProt    byte = 0x01
 )
 
-// Struct that helps describe IPv4 packet structure for both
-//	looking at IPv4 packets and constructing IPv4 packets.
+/*
+Struct that helps describe IPv4 packet structure for both
+looking at IPv4 packets and constructing IPv4 packets.
+*/
 type IPv4Packet struct {
 	VerAndHeadLen  byte // First 4 bits Version, last 4 IHL
 	DSCPandECN     byte // First 6 bits DSCP, last 2 ECN
@@ -26,13 +30,15 @@ type IPv4Packet struct {
 	TTL            byte
 	Protocol       byte
 	Checksum       [2]byte
-	SourceIP       [4]byte
-	DestIP         [4]byte
+	SourceAddr     [4]byte
+	DestAddr       [4]byte
 	Data           []byte
 }
 
-// Struct that helps describe IPv6 packet structure for both
-//	looking at IPv6 packets and constucting IPv6 packets.
+/*
+Struct that helps describe IPv6 packet structure for both
+looking at IPv6 packets and constucting IPv6 packets.
+*/
 type IPv6Packet struct {
 	Version       byte // Actually half a byte (4 bits 0110 = 6 meaning IPv6)
 	TrafficClass  byte
@@ -45,20 +51,10 @@ type IPv6Packet struct {
 	Data          []byte
 }
 
-// // Returns a byte of value 0x04 or 0x06 to signify IPv4 or IPv6
-// //	respectively. Otherwise, returns 0x00.
-// func DataPacketType(dataArr []byte) byte { // Probably not needed
-// 	if insertHexFormat([]byte{dataArr[0]}, "")[0] == '4' {
-// 		return 0x04
-// 	} else if insertHexFormat([]byte{dataArr[0]}, "")[0] == '6' {
-// 		return 0x06
-// 	}
-
-// 	return 0x00
-// }
-
-// Creates, populates, and returns an instance of the IPv4Packet
-//	struct based on the slice of bytes passed into the function.
+/*
+Creates, populates, and returns an instance of the IPv4Packet
+struct based on the slice of bytes passed into the function.
+*/
 func DataToIPv4Packet(dataArr []byte) IPv4Packet { // TODO: Look at encoding/gib
 	verAndHeadLen := dataArr[0]
 	dSCPandECN := dataArr[1]
@@ -68,8 +64,8 @@ func DataToIPv4Packet(dataArr []byte) IPv4Packet { // TODO: Look at encoding/gib
 	tTL := dataArr[8]
 	proto := dataArr[9]
 	check := [2]byte{dataArr[10], dataArr[11]}
-	sourceIP := [4]byte{dataArr[12], dataArr[13], dataArr[14], dataArr[15]}
-	destIP := [4]byte{dataArr[16], dataArr[17], dataArr[18], dataArr[19]}
+	sourceAddr := [4]byte{dataArr[12], dataArr[13], dataArr[14], dataArr[15]}
+	destAddr := [4]byte{dataArr[16], dataArr[17], dataArr[18], dataArr[19]}
 
 	dataSize := binary.BigEndian.Uint16(length[:])
 	// fmt.Printf("%v\n", length)
@@ -90,14 +86,16 @@ func DataToIPv4Packet(dataArr []byte) IPv4Packet { // TODO: Look at encoding/gib
 		TTL:            tTL,
 		Protocol:       proto,
 		Checksum:       check,
-		SourceIP:       sourceIP,
-		DestIP:         destIP,
+		SourceAddr:     sourceAddr,
+		DestAddr:       destAddr,
 		Data:           data,
 	}
 }
 
-// Creates, populates, and returns an instance of the IPv6Packet
-//	struct based on the slice of bytes passed into the function.
+/*
+Creates, populates, and returns an instance of the IPv6Packet
+struct based on the slice of bytes passed into the function.
+*/
 func DataToIPv6Packet(dataArr []byte) IPv6Packet {
 	version := byte(0x06)
 	tempStr := ""
@@ -146,8 +144,10 @@ func DataToIPv6Packet(dataArr []byte) IPv6Packet {
 	}
 }
 
-// Returns a string containing the byte representation of the data
-//	in the IPv4Packet struct instance.
+/*
+Returns a string containing the byte representation of the data
+in the IPv4Packet struct instance.
+*/
 func (packet IPv4Packet) ToHexString() string {
 	var hexString string
 	hexString += hex.EncodeToString([]byte{packet.VerAndHeadLen, packet.DSCPandECN})
@@ -156,15 +156,17 @@ func (packet IPv4Packet) ToHexString() string {
 	hexString += hex.EncodeToString(packet.FlagAndFrag[:])
 	hexString += hex.EncodeToString([]byte{packet.TTL, packet.Protocol})
 	hexString += hex.EncodeToString(packet.Checksum[:])
-	hexString += hex.EncodeToString(packet.SourceIP[:])
-	hexString += hex.EncodeToString(packet.DestIP[:])
+	hexString += hex.EncodeToString(packet.SourceAddr[:])
+	hexString += hex.EncodeToString(packet.DestAddr[:])
 	hexString += hex.EncodeToString(packet.Data)
 
 	return hexString
 }
 
-// Returns a string containing the byte representation of the data
-//	in the IPv6Packet struct instance.
+/*
+Returns a string containing the byte representation of the data
+in the IPv6Packet struct instance.
+*/
 func (packet IPv6Packet) ToHexString() string {
 	var hexString string
 	hexString += hex.EncodeToString([]byte{packet.Version})[2:]
@@ -179,8 +181,10 @@ func (packet IPv6Packet) ToHexString() string {
 	return hexString
 }
 
-// Returns a string that is a more human-readable representation
-//	of the data in the IPv4Packet struct instance.
+/*
+Returns a string that is a more human-readable representation
+of the data in the IPv4Packet struct instance.
+*/
 func (packet IPv4Packet) ToString() string {
 	var returnStr string
 
@@ -209,16 +213,18 @@ func (packet IPv4Packet) ToString() string {
 	returnStr += insertHexFormat(packet.Checksum[:], "")
 
 	returnStr += "\n        Source IP: "
-	returnStr += insertDecimalFormat(packet.SourceIP[:], ".")
+	returnStr += insertDecimalFormat(packet.SourceAddr[:], ".")
 
 	returnStr += "\n        Destination IP: "
-	returnStr += insertDecimalFormat(packet.DestIP[:], ".")
+	returnStr += insertDecimalFormat(packet.DestAddr[:], ".")
 
 	return returnStr
 }
 
-// Returns a string that is a more human-readable representation
-//	of the data in the IPv6Packet struct instance.
+/*
+Returns a string that is a more human-readable representation of the
+data in the IPv6Packet struct instance.
+*/
 func (packet IPv6Packet) ToString() string {
 	var returnStr string
 
@@ -255,4 +261,31 @@ func (packet IPv6Packet) ToString() string {
 	returnStr += destAddr
 
 	return returnStr
+}
+
+/*
+Returns a byte slice of all the data in the IPv4Packet struct.
+*/
+func (packet IPv4Packet) ToData() []byte {
+	var data []byte
+	data = append(data, packet.VerAndHeadLen, packet.DSCPandECN)
+	data = append(data, packet.Length[:]...)
+	data = append(data, packet.Identification[:]...)
+	data = append(data, packet.FlagAndFrag[:]...)
+	data = append(data, packet.TTL, packet.Protocol)
+	data = append(data, packet.Checksum[:]...)
+	data = append(data, packet.SourceAddr[:]...)
+	data = append(data, packet.DestAddr[:]...)
+	data = append(data, packet.Data...)
+
+	return data
+}
+
+/*
+Returns a byte slice of all the data in the IPv6Packet struct. *In progress*
+*/
+func (packet IPv6Packet) ToData() []byte { //TODO
+	var data []byte
+
+	return data
 }

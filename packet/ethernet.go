@@ -3,6 +3,7 @@ package packet
 import (
 	"encoding/hex"
 	"fmt"
+	"net"
 )
 
 type EtherType [2]byte
@@ -72,6 +73,20 @@ func DataToFrame(dataArr []byte) EthernetIIFrame { // TODO: Look at encoding/gib
 		DataIPv4:       dataIPv4,
 		DataIPv6:       dataIPv6,
 	}
+}
+
+func CreateFrame(destMac MacAddress, iface net.Interface, etherType EtherType,
+	ipv4Data IPv4Packet, ipv6Data IPv6Packet) EthernetIIFrame {
+	var newFrame EthernetIIFrame
+
+	newFrame.DestinationMac = destMac
+	newFrame.SourceMac = *((*MacAddress)(iface.HardwareAddr))
+	newFrame.EtherType = etherType
+
+	newFrame.DataIPv4 = ipv4Data
+	newFrame.DataIPv6 = ipv6Data
+
+	return newFrame
 }
 
 /*
@@ -171,4 +186,20 @@ func insertDecimalFormat(byteArr []byte, delimiter string) string {
 	}
 
 	return returnStr
+}
+
+func (frame EthernetIIFrame) ToData() []byte {
+	var data []byte
+
+	data = append(data, frame.DestinationMac[:]...)
+	data = append(data, frame.SourceMac[:]...)
+	data = append(data, frame.EtherType[:]...)
+
+	if frame.EtherType == IPv4 {
+		data = append(data, frame.DataIPv4.ToData()...)
+	} else if frame.EtherType == IPv6 {
+		data = append(data, frame.DataIPv6.ToData()...)
+	}
+
+	return data
 }
